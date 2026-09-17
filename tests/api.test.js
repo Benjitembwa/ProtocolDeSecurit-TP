@@ -5,6 +5,8 @@ import supertest from 'supertest';
 import jwt from 'jsonwebtoken';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 process.env.NODE_ENV = 'test';
+process.env.CLIENT_ORIGIN = 'http://127.0.0.1:5173/';
+process.env.RENDER_EXTERNAL_URL = 'https://sentinel.example/';
 delete process.env.ADMIN_EMAIL;
 delete process.env.ADMIN_PASSWORD;
 const { createApp } = await import('../server/app.js');
@@ -125,6 +127,17 @@ test('mots de passe bcrypt, cookie HttpOnly et profil sans secrets', async () =>
   assert.ok(!JSON.stringify(response.body).includes('passwordHash'));
 });
 test('les origines et les jetons CSRF sont contrôlés avant toute mutation', async () => {
+  assert.equal(config.origin, 'http://127.0.0.1:5173');
+  assert.equal(config.deploymentOrigin, 'https://sentinel.example');
+  assert.equal(
+    (
+      await supertest(app)
+        .post('/api/auth/login')
+        .set('Origin', config.deploymentOrigin)
+        .send({ email: 'nobody@example.org', password: 'invalid' })
+    ).status,
+    401,
+  );
   const c = await client();
   assert.equal(
     (await c.agent.post('/api/simulations').set('Origin', origin).send({ scenario: 'LOW' })).status,

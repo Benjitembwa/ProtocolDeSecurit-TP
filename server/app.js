@@ -118,10 +118,13 @@ export function createApp({ rateLimits = true } = {}) {
       },
     }),
   );
-  const allowedOrigins = new Set([
-    config.origin,
-    ...(!production ? ['http://localhost:5173', 'http://127.0.0.1:4000', 'http://localhost:4000'] : []),
-  ]);
+  const allowedOrigins = new Set(
+    [
+      config.origin,
+      config.deploymentOrigin,
+      ...(!production ? ['http://localhost:5173', 'http://127.0.0.1:4000', 'http://localhost:4000'] : []),
+    ].filter(Boolean),
+  );
   app.use(
     cors({
       credentials: true,

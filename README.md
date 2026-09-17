@@ -114,7 +114,9 @@ Le score est pédagogique, non certifiant. Voir [l’architecture et le modèle 
 
 ## Configuration de production
 
-Pour une instance déployée, fournir `NODE_ENV=production`, `MONGODB_URI`, un `JWT_SECRET` aléatoire d’au moins 48 caractères, `CLIENT_ORIGIN` en HTTPS et, à la première initialisation, `ADMIN_EMAIL` et `ADMIN_PASSWORD` (12 caractères minimum, 72 octets maximum). `HOST=0.0.0.0` permet une écoute à l’intérieur d’un conteneur ; par défaut l’écoute est limitée à `127.0.0.1`.
+Pour une instance déployée, fournir `NODE_ENV=production`, `MONGODB_URI`, un `JWT_SECRET` aléatoire d’au moins 48 caractères, `CLIENT_ORIGIN` en HTTPS et, à la première initialisation, `ADMIN_EMAIL` et `ADMIN_PASSWORD` (12 caractères minimum, 72 octets maximum). `CLIENT_ORIGIN` doit être l’origine exacte du frontend, par exemple `https://protocoldesecurit-tp.onrender.com` (sans chemin ; le slash final est normalisé). Sur Render, `RENDER_EXTERNAL_URL` est également autorisée automatiquement. `HOST=0.0.0.0` permet une écoute à l’intérieur d’un conteneur ; par défaut l’écoute est limitée à `127.0.0.1`.
+
+Pour connecter le frontend Vite local à une API déjà déployée, définir `VITE_API_PROXY_TARGET=https://votre-api.example.com` dans `.env`, puis lancer `npm run dev:web`. Les appels restent relatifs à `/api` dans le navigateur et passent par le proxy Vite, ce qui conserve le modèle de cookie same-origin.
 
 ```powershell
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
