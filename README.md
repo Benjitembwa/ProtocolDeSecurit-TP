@@ -118,6 +118,8 @@ Pour une instance déployée, fournir `NODE_ENV=production`, `MONGODB_URI`, un `
 
 Pour connecter le frontend Vite local à une API déjà déployée, définir `VITE_API_PROXY_TARGET=https://votre-api.example.com` dans `.env`, puis lancer `npm run dev:web`. Les appels restent relatifs à `/api` dans le navigateur et passent par le proxy Vite, ce qui conserve le modèle de cookie same-origin.
 
+Le déploiement Netlify utilise la réécriture définie dans `netlify.toml` pour relayer `/api/*` vers l’API Render. Sur Render, définir `CLIENT_ORIGIN=https://protocoledesucurite.netlify.app` afin d’autoriser les mutations provenant du frontend Netlify. La règle `/api/*` doit rester placée avant la règle SPA `/*`.
+
 ```powershell
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 ```
