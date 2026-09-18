@@ -1,147 +1,720 @@
-# Sentinel — Resilience Lab
+Sentinel — Simulateur web de résilience face aux rançongiciels
 
-Simulateur web de résilience face aux rançongiciels, destiné à un projet de **Master en Réseau et Sécurité Informatique**. Application française, avec interface SOC sombre/claire, authentification réelle et base MongoDB.
+Projet académique de Master 1 Réseaux et Sécurité Informatique consacré à la simulation contrôlée d’incidents de type rançongiciel et à l’étude des mécanismes de résilience, de contrôle d’accès, d’intégrité et de reprise après incident.
 
-Les simulations changent exclusivement les états de ressources fictives dans **MongoDB Atlas**. Elles ne chiffrent aucun fichier hôte, ne parcourent pas le système de fichiers et n’effectuent aucun accès réseau vers les machines simulées. Les comptes, sessions, fichiers fictifs, sauvegardes, incidents et journaux de l’application sont persistés sur le cluster distant.
+Important : Sentinel est un simulateur pédagogique. Il n’exécute aucun rançongiciel réel, ne chiffre aucun fichier du système hôte et n’effectue aucune attaque ou aucun scan sur une infrastructure externe.
 
-## Démarrage rapide
+1. Contexte académique
 
-Prérequis : **Node.js 22.12+** ou 24, npm, une connexion Internet et un accès à votre cluster MongoDB Atlas. Le backend et l’interface peuvent tourner sur votre ordinateur ; la base de l’application est distante.
+Université : Université de Kinshasa
 
-```powershell
+Faculté : Faculté des Sciences
+
+Département : Mathématiques et Informatique
+
+Filière : Master 1 Réseaux et Sécurité Informatique
+
+Cours : Protocoles de Sécurité Réseau
+
+Année académique : 2025–2026
+
+Titulaire du cours : Prof. KASENGEDIA BOTUMBE
+
+Collaborateur : Doctorant KANINGINI LUTALA Junior
+
+Membres du groupe
+
+N°
+
+Nom complet
+
+1
+
+TEMBWA NGENGO BENJI
+
+2
+
+MBUYI MUTUNGILAYI Benjamin
+
+3
+
+KAZADI KABUYA Augustin
+
+4
+
+LUABEYA MUKENDI Barnabé
+
+2. Présentation du projet
+
+Sentinel est une application web permettant de simuler, dans un environnement entièrement fictif et contrôlé, l’impact d’un incident de type ransomware sur les ressources d’une organisation.
+
+L’application permet notamment de :
+
+gérer des utilisateurs, machines, serveurs, services et fichiers fictifs ;
+
+lancer des scénarios d’incident de différents niveaux ;
+
+observer les ressources compromises ;
+
+créer et vérifier des sauvegardes ;
+
+contrôler l’intégrité des données avec SHA-256 ;
+
+gérer les incidents et leur cycle de vie ;
+
+restaurer les ressources affectées ;
+
+suivre un plan de reprise après incident ;
+
+appliquer un contrôle d’accès basé sur les rôles ;
+
+mesurer des indicateurs de résilience ;
+
+consulter des journaux et rapports d’incident.
+
+Les simulations modifient uniquement l’état logique des ressources stockées dans l’application. Aucun fichier réel de l’ordinateur de l’utilisateur n’est chiffré ou modifié.
+
+3. Objectif général
+
+Concevoir, développer et déployer une application web fonctionnelle démontrant l’utilisation de mécanismes de sécurité réseau et cryptographiques pour améliorer la résilience d’un système d’information face à des scénarios simulés de rançongiciel.
+
+Objectifs spécifiques
+
+simuler différents niveaux d’incident sans utiliser de logiciel malveillant réel ;
+
+sécuriser les échanges entre le navigateur et l’application avec HTTPS/TLS ;
+
+mettre en œuvre une authentification sécurisée ;
+
+contrôler les accès avec le modèle RBAC ;
+
+vérifier l’intégrité des données avec SHA-256 ;
+
+gérer des sauvegardes et leur restauration ;
+
+représenter un plan de reprise après incident ;
+
+produire des journaux, rapports et indicateurs de résilience ;
+
+démontrer les principales étapes de détection, confinement et récupération.
+
+4. Liens du projet
+
+Ressource
+
+Adresse
+
+Application déployée
+
+https://protocole-de-securite.netlify.app/
+
+Dépôt GitHub
+
+https://github.com/Benjitembwa/ProtocolDeSecurit-TP
+
+5. Architecture générale
+
+L’application suit une architecture web Full-Stack composée d’un frontend React, d’une API REST Node.js/Express et d’une base de données MongoDB.
+
+flowchart LR
+    U[Utilisateur] -->|HTTPS / TLS| F[Frontend React / Vite]
+    F -->|Requêtes API| API[API REST Node.js / Express]
+
+    API --> AUTH[Authentification / JWT / RBAC]
+    API --> SIM[Moteur de simulation]
+    API --> INC[Gestion des incidents]
+    API --> BCK[Gestion des sauvegardes]
+    API --> SHA[Vérification SHA-256]
+    API --> REC[Plan de reprise]
+    API --> REP[Rapports et indicateurs]
+
+    AUTH --> DB[(MongoDB Atlas)]
+    SIM --> DB
+    INC --> DB
+    BCK --> DB
+    SHA --> DB
+    REC --> DB
+    REP --> DB
+
+Les échanges entre le navigateur et l’application déployée sont protégés par HTTPS/TLS. Les secrets applicatifs sont fournis à travers des variables d’environnement et ne doivent jamais être enregistrés directement dans le code source.
+
+6. Technologies utilisées
+
+Frontend
+
+React
+
+Vite
+
+Tailwind CSS
+
+Framer Motion
+
+React Router
+
+Axios
+
+React Hook Form
+
+Zod
+
+Lucide React
+
+Recharts
+
+React Hot Toast
+
+Backend
+
+Node.js
+
+Express.js
+
+MongoDB Atlas
+
+Mongoose
+
+node:crypto pour SHA-256
+
+Sécurité
+
+HTTPS/TLS
+
+bcrypt pour le hachage des mots de passe
+
+JWT pour l’authentification
+
+RBAC pour l’autorisation
+
+cookies HttpOnly / SameSite
+
+protection CSRF
+
+validation Zod
+
+limitation des requêtes
+
+Helmet
+
+variables d’environnement
+
+SHA-256 pour la vérification d’intégrité
+
+7. Modules fonctionnels
+
+7.1 Simulation des incidents
+
+Le simulateur propose plusieurs niveaux :
+
+Faible : compromission limitée ;
+
+Moyen : impact intermédiaire ;
+
+Critique : impact important ;
+
+Personnalisé : sélection manuelle des ressources concernées.
+
+Chaque simulation peut affecter des fichiers, postes, serveurs ou services fictifs et génère automatiquement un incident.
+
+7.2 Centre des incidents
+
+Chaque incident contient notamment :
+
+un identifiant ;
+
+une date ;
+
+un niveau de gravité ;
+
+les ressources affectées ;
+
+les fichiers compromis ;
+
+son impact ;
+
+les actions réalisées ;
+
+son état.
+
+Cycle de vie principal :
+
+DETECTED → CONTAINED → RECOVERY → RESOLVED
+
+7.3 Sauvegardes
+
+Le système permet de :
+
+créer des sauvegardes complètes ou partielles ;
+
+consulter leur contenu ;
+
+vérifier leur intégrité ;
+
+restaurer les ressources ;
+
+supprimer une sauvegarde lorsque le rôle l’autorise.
+
+7.4 Vérification SHA-256
+
+Chaque donnée fictive peut disposer d’une empreinte SHA-256.
+
+Lors d’une vérification :
+
+l’empreinte de référence est récupérée ;
+
+l’empreinte actuelle est recalculée ;
+
+les deux valeurs sont comparées ;
+
+le système indique si l’intégrité est valide ou si une altération est détectée.
+
+7.5 Restauration et plan de reprise
+
+Le workflow de récupération suit notamment les étapes suivantes :
+
+détection ;
+
+confinement ;
+
+analyse ;
+
+sélection d’une sauvegarde fiable ;
+
+vérification SHA-256 ;
+
+restauration ;
+
+contrôle d’intégrité ;
+
+réactivation des services ;
+
+clôture de l’incident.
+
+7.6 Tableau de bord
+
+Le tableau de bord permet de suivre :
+
+le nombre de machines et serveurs ;
+
+le nombre de fichiers ;
+
+les fichiers sains, compromis ou restaurés ;
+
+les incidents ;
+
+les sauvegardes ;
+
+l’état des services ;
+
+les dernières activités ;
+
+le score de résilience ;
+
+l’évolution des principaux indicateurs.
+
+8. Rôles et autorisations
+
+Le système utilise trois rôles.
+
+ADMIN
+
+L’administrateur possède les permissions les plus étendues. Il peut notamment :
+
+gérer les utilisateurs ;
+
+lancer les simulations ;
+
+gérer les sauvegardes ;
+
+effectuer les restaurations ;
+
+gérer le plan de reprise ;
+
+consulter les rapports et journaux.
+
+SECURITY_ANALYST
+
+L’analyste de sécurité peut notamment :
+
+consulter les incidents ;
+
+analyser les simulations ;
+
+vérifier les empreintes SHA-256 ;
+
+consulter les sauvegardes ;
+
+consulter les rapports ;
+
+accéder aux fonctionnalités d’un utilisateur simple.
+
+USER
+
+L’utilisateur simple peut principalement :
+
+consulter l’état général du système ;
+
+consulter les ressources qui lui sont autorisées.
+
+Le modèle de droits est hiérarchique : ADMIN dispose également des capacités de SECURITY_ANALYST, qui dispose lui-même des capacités de USER.
+
+9. Comptes de démonstration
+
+Rôle
+
+Adresse e-mail
+
+Mot de passe
+
+ADMIN
+
+admin@sentinel.lab
+
+Sentinel!2026
+
+SECURITY_ANALYST
+
+analyst@sentinel.lab
+
+Sentinel!2026
+
+USER
+
+user@sentinel.lab
+
+Sentinel!2026
+
+Ces comptes sont exclusivement destinés à la démonstration académique. Ne pas réutiliser ces identifiants dans une application réelle.
+
+10. Installation locale
+
+Prérequis
+
+Node.js 22.12+ ou 24
+
+npm
+
+connexion Internet
+
+accès à un cluster MongoDB Atlas
+
+Cloner le projet
+
+git clone https://github.com/Benjitembwa/ProtocolDeSecurit-TP.git
+cd ProtocolDeSecurit-TP
+
+Installer les dépendances
+
+npm install
+
+Sous Windows PowerShell, il est également possible d’utiliser :
+
 npm.cmd install
-npm.cmd run db:check
-npm.cmd run dev
-```
 
-Sous macOS/Linux, utiliser `npm` à la place de `npm.cmd`. Sous PowerShell, `npm.cmd` évite le blocage de `npm.ps1` par la politique d’exécution Windows.
+Configurer les variables d’environnement
 
-Ouvrir **http://127.0.0.1:5173**. L’API écoute sur **http://127.0.0.1:4000** et se connecte à la base **`sentinel`** dans Atlas. Le démarrage refuse toute URL manquante, incomplète ou locale. Il n’existe aucun repli vers une base locale. La commande `db:check` effectue un contrôle de connexion en lecture seule.
+Copier le fichier d’exemple :
 
-Au premier lancement sur une base Atlas sans laboratoire Sentinel, trois comptes de démonstration et les ressources fictives sont initialisés **dans Atlas**. Les boutons de démonstration préremplissent le formulaire ; il faut cliquer sur « Se connecter » pour ouvrir une vraie session. Un laboratoire déjà présent est conservé.
+cp .env.example .env
 
-| Rôle             | Adresse e-mail         | Mot de passe initial |
-| ---------------- | ---------------------- | -------------------- |
-| ADMIN            | `admin@sentinel.lab`   | `Sentinel!2026`      |
-| SECURITY_ANALYST | `analyst@sentinel.lab` | `Sentinel!2026`      |
-| USER             | `user@sentinel.lab`    | `Sentinel!2026`      |
+Sous Windows :
 
-Ces identifiants sont destinés à la démonstration académique. En `NODE_ENV=production`, aucun compte de démonstration n’est créé et les raccourcis de connexion sont désactivés. Un changement de mot de passe ne sera pas écrasé au redémarrage.
+copy .env.example .env
 
-Le fichier privé `.env` contient `MONGODB_URI`, `MONGODB_DB_NAME=sentinel` et le secret de session. Il est exclu de Git. Pour une nouvelle installation, copier `.env.example` vers `.env`, remplacer les identifiants d’exemple et utiliser un utilisateur créé dans **Atlas → Database Access**. Autoriser l’adresse IP du backend dans **Atlas → Network Access**. Ne jamais mettre ces identifiants dans une variable `VITE_*` ou dans le code React.
+Renseigner ensuite les valeurs nécessaires sans publier les secrets :
 
-Les données de l’ancien dossier `.data/mongo` ne sont plus lues ni écrites par l’application. Elles ne sont pas automatiquement migrées ou effacées : Atlas constitue désormais une source distincte. Les documents du simulateur restent fictifs ; leur stockage et les opérations SHA-256 sont réels. Les tests automatisés emploient leurs propres bases jetables, jamais la base Atlas de l’application.
+MONGODB_URI=<mongodb-atlas-connection-string>
+MONGODB_DB_NAME=sentinel
+JWT_SECRET=<secret-long-et-aleatoire>
+CLIENT_ORIGIN=http://127.0.0.1:5173
 
-## Fonctionnalités
+Pour un déploiement de production, prévoir également les paramètres nécessaires à l’initialisation administrative selon la configuration du serveur.
 
-- Authentification bcrypt coût 12, JWT expirant, cookie HttpOnly/SameSite, sessions révocables en MongoDB, CSRF, origines autorisées, limitation des requêtes, validation Zod et protections Helmet.
-- Trois rôles contrôlés **dans l’API** et dans les routes React. Les utilisateurs ordinaires voient seulement leurs fichiers et les systèmes associés ; les indicateurs généraux et l’état des services restent visibles.
-- Dashboard avec score expliqué, graphiques de résilience/incidents, répartition des fichiers, services et activités réelles du laboratoire.
-- Scénarios faible, moyen, critique et personnalisé ; choix des postes, serveurs et services. Sélection aléatoire des fichiers fictifs, création d’incident, calcul d’impact, journaux et animation pédagogique.
-- Infrastructure : 8 postes, 4 serveurs, 4 services et 144 fichiers fictifs. IP dans le réseau documentaire `192.0.2.0/24`.
-- Sauvegardes complètes ou partielles, instantanés indépendants, manifeste SHA-256, vérification, suppression contrôlée. Une copie volontairement altérée permet de démontrer un échec d’intégrité.
-- Workflow de reprise en 9 étapes, contrôle de l’ordre côté serveur, restauration par lots, revérification avant copie et contrôle après restauration, réactivation des services et clôture.
-- Plan de reprise, objectifs RTO/RPO configurables, rapports d’incident, export JSON et mise en page d’impression A4 permettant l’enregistrement PDF.
-- Gestion des utilisateurs, modification des accès, désactivation des comptes non administrateurs, attribution des fichiers aux utilisateurs, modification de son mot de passe et révocation des sessions.
-- Recherche, tri et pagination des tableaux, filtres, raccourci `Ctrl+K`, notifications liées aux incidents, toasts, chargements et états d’erreur, adaptation mobile et préférence de thème persistante.
+Ne jamais committer le fichier .env ni placer des identifiants MongoDB dans une variable VITE_*.
 
-## Parcours de démonstration
+Vérifier la connexion à MongoDB
 
-1. Se connecter en administrateur et présenter le dashboard initial : 144 fichiers sains, score 100, 4 services disponibles.
-2. Dans **Sauvegardes**, créer une copie complète récente.
-3. Dans **Vérification d’intégrité**, vérifier la copie normale, puis « Échantillon altéré · test d’intégrité » : comparer `Integrity verified` et `Integrity check failed`.
-4. Dans **Simulations**, choisir un niveau ou configurer quelques fichiers sur `SERVER-FILES-01`.
-5. Lancer et observer l’incident, l’impact, les services dégradés et la baisse de score.
-6. Dans **Restauration**, parcourir confinement → analyse → sélection de sauvegarde → SHA-256 → restauration. Restaurer un premier lot, puis le reste pour illustrer la progression réelle.
-7. Effectuer le contrôle final, réactiver les services et clôturer.
-8. Ouvrir **Rapports**, comparer les scores, le taux restauré, le temps de reprise et les objectifs RTO/RPO. Utiliser **Imprimer / PDF**, puis choisir « Enregistrer au format PDF ».
-9. Se connecter en analyste puis en utilisateur pour démontrer les différences de droits.
+npm run db:check
 
-Voir [le guide de soutenance](docs/DEMONSTRATION.md) pour une présentation structurée et les limites à expliciter.
+Lancer l’application
 
-## Commandes
+npm run dev
 
-| Commande                              | Résultat                                                         |
-| ------------------------------------- | ---------------------------------------------------------------- |
-| `npm run dev`                         | API avec surveillance des fichiers et frontend Vite              |
-| `npm run dev:api` / `npm run dev:web` | Démarrer séparément les deux services                            |
-| `npm run build`                       | Compiler le frontend dans `dist/`                                |
-| `npm start`                           | API et frontend compilé servis ensemble sur le port 4000         |
-| `npm run seed`                        | Initialiser seulement si le laboratoire n’existe pas             |
-| `npm run db:check`                    | Vérifier la connexion Atlas sans créer de données                |
-| `npm test`                            | Tests d’intégration/sécurité avec MongoDB temporaire             |
-| `npm run test:e2e`                    | Tests navigateur avec base dédiée temporaire et serveur sur 4100 |
-| `npm run check`                       | Compilation puis tests API                                       |
+Par défaut :
 
-Avant `npm run test:e2e`, exécuter `npm run build`. Sous Windows les tests utilisent Microsoft Edge installé. Ailleurs, installer Chromium avec `npx playwright install chromium`. La variable `PLAYWRIGHT_CHANNEL` permet de choisir un navigateur installé, par exemple `chrome`.
+Frontend : http://127.0.0.1:5173
 
-Les tests navigateur produisent des captures et un exemple de rapport PDF dans `.data/screenshots/`, ainsi qu’un rapport dans `playwright-report/`. Les bases de tests ne contiennent que des jeux de données dédiés et n’utilisent jamais la base de développement.
+API : http://127.0.0.1:4000
 
-Les résultats obtenus et le périmètre de vérification sont consignés dans [le compte rendu de validation](docs/VALIDATION.md).
+11. Commandes utiles
 
-## Stack et organisation
+Commande
 
-```text
-src/
-  api.js                  Axios, CSRF, traitement des erreurs
-  state.jsx               Session et état du laboratoire
-  App.jsx                 Navigation, thèmes, routes et droits
-  components/ui.jsx       Modales, tables, badges, pagination
-  pages/                  13 écrans fonctionnels
-  styles.css, pages.css   Tailwind CSS 4 et styles SOC responsive
-server/
-  config.js, database.js  Configuration et connexion MongoDB Atlas
-  models.js               Schémas Mongoose stricts
-  auth.js                 bcrypt, JWT, sessions, CSRF, rôles
-  domain.js               Simulation, sauvegarde, SHA-256, reprise
-  app.js                  API REST, validations et autorisations
-  seed-data.js            Organisation et ressources fictives
-tests/                    Tests API et navigateur
-docs/                     Architecture, API et soutenance
-```
+Description
 
-Frontend : React, Vite, Tailwind CSS, Framer Motion, React Router, Axios, React Hook Form, Zod, Lucide React, Recharts et React Hot Toast. Backend : Node.js, Express 5, MongoDB, Mongoose et `node:crypto` pour SHA-256. Le verrou `package-lock.json` rend les versions installées reproductibles.
+npm run dev
 
-## Architecture et périmètre
+Lance le frontend et l’API en développement
 
-Le laboratoire utilise un **agrégat MongoDB unique** contenant les ressources, incidents, sauvegardes, étapes et journaux. Une mutation métier est validée sur une copie, puis enregistrée en une écriture atomique avec contrôle de version Mongoose. Deux simulations concurrentes ne peuvent pas écraser l’état l’une de l’autre : la seconde reçoit HTTP 409 et doit être réessayée après actualisation. Les utilisateurs et sessions ont leurs propres collections.
+npm run dev:web
 
-Ce choix convient à un laboratoire borné : 144 fichiers, 30 copies, 100 incidents et 2 000 journaux conservés. Il ne constitue pas une architecture SOC à grande échelle. Les snapshots contiennent seulement de petits textes générés ; les tailles affichées sont simulées. Les événements d’authentification/gestion des comptes, stockés dans des collections différentes, ne constituent pas une transaction multi-document avec le journal.
+Lance uniquement le frontend
 
-Une seule simulation peut rester ouverte à la fois. La sauvegarde choisie pour un incident doit couvrir **tous** ses fichiers, même si la restauration se fait en plusieurs lots. Une copie partielle reste utile pour protéger un périmètre limité, mais sera refusée pour un incident plus étendu. Sans sauvegarde compatible, la reprise est bloquée ; l’application ne fabrique pas un succès ni une sauvegarde antérieure.
+npm run dev:api
 
-Le score est pédagogique, non certifiant. Voir [l’architecture et le modèle de sécurité](docs/ARCHITECTURE.md) ainsi que [la référence API](docs/API.md).
+Lance uniquement l’API
 
-## Configuration de production
+npm run build
 
-Pour une instance déployée, fournir `NODE_ENV=production`, `MONGODB_URI`, un `JWT_SECRET` aléatoire d’au moins 48 caractères, `CLIENT_ORIGIN` en HTTPS et, à la première initialisation, `ADMIN_EMAIL` et `ADMIN_PASSWORD` (12 caractères minimum, 72 octets maximum). `CLIENT_ORIGIN` doit être l’origine exacte du frontend, par exemple `https://protocoldesecurit-tp.onrender.com` (sans chemin ; le slash final est normalisé). Sur Render, `RENDER_EXTERNAL_URL` est également autorisée automatiquement. `HOST=0.0.0.0` permet une écoute à l’intérieur d’un conteneur ; par défaut l’écoute est limitée à `127.0.0.1`.
+Compile le frontend dans dist/
 
-Pour connecter le frontend Vite local à une API déjà déployée, définir `VITE_API_PROXY_TARGET=https://votre-api.example.com` dans `.env`, puis lancer `npm run dev:web`. Les appels restent relatifs à `/api` dans le navigateur et passent par le proxy Vite, ce qui conserve le modèle de cookie same-origin.
+npm start
 
-Le déploiement Netlify utilise la réécriture définie dans `netlify.toml` pour relayer `/api/*` vers l’API Render. Sur Render, définir `CLIENT_ORIGIN=https://protocoledesucurite.netlify.app` afin d’autoriser les mutations provenant du frontend Netlify. La règle `/api/*` doit rester placée avant la règle SPA `/*`.
+Lance l’API et sert le frontend compilé
 
-```powershell
-node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
-```
+npm run db:check
 
-Servir `dist/` via l’API derrière un reverse proxy HTTPS ; les cookies Secure sont activés en production. MongoDB doit être authentifié et accessible uniquement au backend. Le secret temporaire de développement invalide les sessions lors d’un redémarrage ; définir `JWT_SECRET` pour une signature stable. Ne jamais committer `.env`.
+Vérifie la connexion MongoDB Atlas
 
-Un [Dockerfile](Dockerfile) est fourni pour construire l’application. La recette conteneur n’est pas nécessaire au lancement local et requiert une base MongoDB externe configurée. Elle ne configure pas de domaine ou de certificat TLS.
+npm run seed
 
-## Dépannage
+Initialise les données de démonstration si nécessaire
 
-- **Connexion Atlas impossible** : lancer `npm.cmd run db:check`, vérifier l’utilisateur dans Database Access, son mot de passe, les autorisations IP dans Network Access et la disponibilité du cluster. Le nom d’utilisateur de base de données est distinct du compte de connexion au site Atlas.
-- **URL incomplète** : remplacer `<db_username>` et `<db_password>` dans `.env`. Les caractères spéciaux des identifiants doivent être encodés dans l’URL ; ne pas partager le contenu du fichier.
-- **Erreur DNS `querySrv ECONNREFUSED`** : certains environnements Windows exposent à Node.js un résolveur local qui ne répond pas. La variable optionnelle `MONGODB_DNS_SERVERS=1.1.1.1,8.8.8.8` dans `.env` sélectionne les résolveurs pour le processus Node.js uniquement, sans modifier Windows. Elle est configurée sur cette installation après vérification du problème. Sans cette variable, le DNS système est utilisé. Voir le [dépannage DNS officiel Atlas](https://www.mongodb.com/docs/atlas/troubleshoot-connection/).
-- **Port occupé** : arrêter l’autre instance de l’application. Le frontend utilise 5173, l’API 4000 et les tests navigateur 4100. Si vous modifiez ces ports, ajuster le proxy Vite et `CLIENT_ORIGIN` ensemble.
-- **HTTP 403 sur POST** : utiliser l’URL autorisée et une session active ; l’API vérifie l’origine ainsi que `X-CSRF-Token`.
-- **HTTP 409** : une action concurrente a modifié l’état, une étape est hors ordre, ou une ressource est protégée. Lire le message retourné et actualiser.
-- **Bac à sable Windows / esbuild « Access is denied »** : le chargement natif de la configuration est activé. Le préassemblage Vite nécessite néanmoins que le processus ait accès aux dépendances et puisse parcourir les dossiers parents ; démarrer `npm.cmd run dev` depuis un terminal disposant de ces droits.
-- **Pas de PDF téléchargé automatiquement** : l’export PDF passe par la fenêtre d’impression du navigateur. L’export JSON télécharge directement un fichier.
+npm test
 
-## Références techniques
+Exécute les tests d’intégration et de sécurité
 
-- [Express : recommandations de sécurité et cookies](https://expressjs.com/en/advanced/best-practice-security/)
-- [MongoDB : atomicité des écritures sur un document](https://www.mongodb.com/docs/manual/core/write-operations-atomicity/)
-- [MongoDB Atlas : connexion, utilisateur de base et autorisations IP](https://www.mongodb.com/docs/atlas/connect-to-database-deployment/)
-- [Tailwind CSS : intégration Vite](https://tailwindcss.com/docs/installation/using-vite)
+npm run test:e2e
+
+Exécute les tests navigateur
+
+npm run check
+
+Compile puis exécute les tests API
+
+12. Scénario de démonstration recommandé
+
+Se connecter avec le compte administrateur.
+
+Présenter le tableau de bord et l’état initial des ressources.
+
+Créer ou vérifier une sauvegarde complète.
+
+Effectuer une vérification SHA-256 sur une donnée intacte.
+
+Tester une donnée volontairement altérée afin de montrer l’échec du contrôle d’intégrité.
+
+Lancer un scénario de simulation faible, moyen ou critique.
+
+Observer les fichiers et services compromis ainsi que l’incident créé.
+
+Ouvrir le processus de restauration.
+
+Effectuer le confinement et l’analyse.
+
+Sélectionner une sauvegarde valide.
+
+Vérifier son intégrité.
+
+Restaurer les ressources affectées.
+
+Réactiver les services et clôturer l’incident.
+
+Consulter le rapport final et le score de résilience.
+
+Se connecter avec les rôles SECURITY_ANALYST puis USER afin de démontrer les différences de permissions.
+
+13. Tests réalisés
+
+Le projet comporte des tests fonctionnels et de sécurité portant notamment sur :
+
+ID
+
+Test
+
+Résultat attendu
+
+T1
+
+Accès HTTPS
+
+Connexion HTTPS valide
+
+T2
+
+Authentification valide
+
+Accès accordé
+
+T3
+
+Authentification invalide
+
+Accès refusé sans information sensible
+
+T4
+
+RBAC
+
+Fonction réservée inaccessible avec un rôle insuffisant
+
+T5
+
+SHA-256 — intégrité
+
+Empreintes identiques
+
+T6
+
+SHA-256 — altération
+
+Empreintes différentes
+
+T7
+
+Sauvegarde / reprise
+
+Ressources restaurées
+
+T8
+
+Validation des entrées
+
+Valeur invalide rejetée
+
+T9
+
+Gestion des erreurs
+
+Aucun secret ou détail interne exposé
+
+Pour exécuter les tests automatisés :
+
+npm test
+npm run build
+npm run test:e2e
+
+14. Indicateurs de résilience
+
+Le simulateur permet d’illustrer plusieurs indicateurs permettant d’évaluer la capacité de récupération après un incident :
+
+MTTD : temps moyen de détection ;
+
+MTTR : temps moyen de reprise ;
+
+disponibilité des sauvegardes ;
+
+taux de restauration ;
+
+intégrité des ressources restaurées ;
+
+disponibilité des services ;
+
+score de résilience avant et après récupération.
+
+Ces indicateurs sont pédagogiques et dépendent des scénarios et paramètres de démonstration. Ils ne doivent pas être interprétés comme des performances représentatives d’une infrastructure réelle.
+
+15. Déploiement
+
+Frontend
+
+Le frontend est déployé sur Netlify et est accessible en HTTPS.
+
+Backend
+
+L’API Node.js/Express est prévue pour être déployée sur une plateforme compatible telle que Render. Le fichier netlify.toml permet au frontend Netlify de relayer les requêtes /api/* vers l’API configurée.
+
+En production, les paramètres sensibles doivent être définis uniquement dans les variables d’environnement de la plateforme :
+
+NODE_ENV=production
+MONGODB_URI=<mongodb-atlas-connection-string>
+MONGODB_DB_NAME=sentinel
+JWT_SECRET=<secret-aleatoire-d-au-moins-48-caracteres>
+CLIENT_ORIGIN=<origine-https-du-frontend>
+
+MongoDB doit rester accessible uniquement au backend.
+
+16. Sécurité, éthique et conformité
+
+Ce projet respecte un cadre strictement pédagogique et éthique.
+
+Il n’effectue :
+
+aucun chiffrement malveillant réel ;
+
+aucune propagation de ransomware ;
+
+aucun scan non autorisé ;
+
+aucune attaque contre une machine externe ;
+
+aucune collecte de données personnelles réelles ;
+
+aucune collecte de paiement réel.
+
+Les machines, fichiers, utilisateurs, sauvegardes, incidents et services manipulés par Sentinel sont fictifs ou synthétiques.
+
+Les secrets applicatifs sont placés dans des variables d’environnement et exclus du dépôt Git.
+
+17. Limites du projet
+
+Sentinel est un simulateur académique et non une plateforme SOC professionnelle ou un outil réel de réponse aux rançongiciels.
+
+Ses principales limites sont les suivantes :
+
+aucun fichier réel n’est chiffré ;
+
+aucune propagation réseau réelle n’est simulée ;
+
+les performances observées dépendent des données fictives du laboratoire ;
+
+HTTPS/TLS ne garantit pas à lui seul la sécurité globale de l’application ;
+
+SHA-256 contrôle l’intégrité mais n’assure pas la confidentialité ;
+
+le RBAC dépend d’une configuration correcte des rôles et permissions ;
+
+les sauvegardes simulées ne reproduisent pas toutes les contraintes d’une infrastructure de production ;
+
+le score de résilience est pédagogique et non certifiant.
+
+18. Structure simplifiée du projet
+
+.
+├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── api.js
+│   ├── state.jsx
+│   └── App.jsx
+│
+├── server/
+│   ├── app.js
+│   ├── auth.js
+│   ├── config.js
+│   ├── database.js
+│   ├── domain.js
+│   ├── models.js
+│   └── seed-data.js
+│
+├── tests/
+├── docs/
+├── public/
+├── scripts/
+├── .env.example
+├── netlify.toml
+├── Dockerfile
+├── package.json
+└── vite.config.js
+
+19. Conclusion
+
+Sentinel démontre de manière pratique comment plusieurs mécanismes de sécurité peuvent être combinés pour améliorer la résilience d’un système d’information face à un incident simulé de type rançongiciel.
+
+Le projet met particulièrement en évidence la complémentarité entre HTTPS/TLS, authentification, RBAC, SHA-256, sauvegardes, journalisation et plan de reprise.
+
+L’objectif n’est pas de reproduire une attaque réelle, mais de fournir un environnement sûr permettant d’observer les conséquences d’un incident, d’appliquer les différentes étapes de récupération et de mieux comprendre les principes de résilience et de sécurité des réseaux.
+
+Projet académique — Université de Kinshasa
+
+Master 1 Réseaux et Sécurité Informatique — Année académique 2025–2026
